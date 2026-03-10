@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analítico - Atendimentos</title>
+    <!-- Fonte Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para icones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Nosso estilo -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Bibliotecas externas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="header-left">
+                    <h1 class="page-title">Visão Geral Operacional</h1>
+                    <p class="page-subtitle" id="dataRange">Carregando período de dados...</p>
+                </div>
+                <div class="search-container header-search">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar em Atendimentos...">
+                </div>
+            </header>
+
+            <!-- Loading Spinner -->
+            <div id="loader" class="loader-container">
+                <div class="spinner"></div>
+                <p>Analisando dados...</p>
+            </div>
+
+            <div id="dashboardGrid" class="dashboard-grid hidden">
+                <a href="mapa.html" class="kpi-card glass col-span-3" style="text-decoration: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                    <div class="kpi-icon icon-green" style="background: rgba(16, 185, 129, 0.2); color: #10b981;"><i class="fa-solid fa-map-location-dot"></i></div>
+                    <div class="kpi-data">
+                        <h3>Acessar Mapa</h3>
+                        <p>Visão Geográfica</p>
+                    </div>
+                </a>
+
+                <!-- KPIs -->
+                <div class="kpi-card glass col-span-3">
+                    <div class="kpi-icon icon-blue"><i class="fa-solid fa-truck-fast"></i></div>
+                    <div class="kpi-data">
+                        <h3 id="kpi-km">0</h3>
+                        <p>KM Total</p>
+                    </div>
+                </div>
+                <!-- NOVOS KM -->
+                <div class="kpi-card glass col-span-2">
+                    <div class="kpi-icon icon-blue" style="background: rgba(14, 165, 233, 0.2); color: #0ea5e9;"><i class="fa-solid fa-plane"></i></div>
+                    <div class="kpi-data">
+                        <h3 id="kpi-km-aereo">0</h3>
+                        <p>KM Aéreo</p>
+                    </div>
+                </div>
+                <div class="kpi-card glass col-span-2">
+                    <div class="kpi-icon icon-blue" style="background: rgba(234, 179, 8, 0.2); color: #eab308;"><i class="fa-solid fa-car"></i></div>
+                    <div class="kpi-data">
+                        <h3 id="kpi-km-terrestre">0</h3>
+                        <p>KM Terrestre</p>
+                    </div>
+                </div>
+
+                <div class="kpi-card glass col-span-2">
+                    <div class="kpi-icon icon-pink"><i class="fa-solid fa-calendar-check"></i></div>
+                    <div class="kpi-data">
+                        <h3 id="kpi-days">0</h3>
+                        <p>Dias Trabalhados</p>
+                    </div>
+                </div>
+
+                <!-- Gráficos -->
+                <div class="chart-card glass col-span-12">
+                    <div class="chart-header drilldown-header">
+                        <div class="header-left">
+                            <button id="btnBackChart" class="btn-back hidden"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+                            <h3 id="mainChartTitle">Volume de Atendimentos por Ano</h3>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card glass col-span-3">
+                    <div class="chart-header">
+                        <h3>Distribuição de Serviços</h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card glass col-span-3 uf-card">
+                    <div class="chart-header">
+                        <h3>Atendimentos por Estados</h3>
+                    </div>
+                    <div class="table-container uf-table-container">
+                        <table id="ufTable">
+                            <thead>
+                                <tr>
+                                    <th>Estado</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="chart-card glass col-span-3">
+                    <div class="chart-header">
+                        <h3>Atendimentos com vs sem OS</h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="osChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card glass col-span-3 uf-card">
+                    <div class="chart-header">
+                        <h3>Maiores Demandantes</h3>
+                    </div>
+                    <div class="table-container uf-table-container">
+                        <table id="demandanteTable">
+                            <thead>
+                                <tr>
+                                    <th>Responsável</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    <!-- Modal de Atendimentos -->
+    <div id="dayModal" class="modal-backdrop hidden">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3 id="modalTitle">Atendimentos do Dia</h3>
+                <button id="closeModalBtn" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Conteúdo via JS -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
